@@ -1,8 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from . import models, schemas
-from .clients.openlibrary import OpenLibraryClient
+from src.library_catalog.app.models import book as book_models
+from src.library_catalog.app.schemas import book as book_schemas
+from src.library_catalog.app.integrations.open_library import OpenLibraryClient
 
 
 class BookRepository:
@@ -11,18 +12,19 @@ class BookRepository:
         self.openlibrary_client = OpenLibraryClient()
 
     async def get_all(self):
-        result = await self.session.execute(select(models.Book))
+        result = await self.session.execute(select(book_models.Book))
         return result.scalars().all()
 
     async def get_by_id(self, book_id: int):
-        result = await self.session.execute(select(models.Book).where(models.Book.id == book_id))
+        result = await self.session.execute(
+            select(book_models.Book).where(book_models.Book.id == book_id)
+        )
         return result.scalar_one_or_none()
 
-    async def create(self, book_data: schemas.BookCreate):
-        # Получаем доп. данные из OpenLibrary
+    async def create(self, book_data: book_schemas.BookCreate):
         extra = await self.openlibrary_client.fetch_by_title(book_data.title) or {}
 
-        new_book = models.Book(
+        new_book = book_models.Book(
             title=book_data.title,
             author=book_data.author,
             year=book_data.year,
@@ -39,7 +41,7 @@ class BookRepository:
         await self.session.refresh(new_book)
         return new_book
 
-    async def update(self, book_id: int, updated_data: schemas.BookCreate):
+    async def update(self, book_id: int, updated_data: book_schemas.BookCreate):
         book = await self.get_by_id(book_id)
         if not book:
             return None
