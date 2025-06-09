@@ -1,9 +1,9 @@
 from typing import Optional
 
 from .base import BaseApiClient
+from src.library_catalog.app.interfaces.open_library_interface import IOpenLibraryClient
 
-
-class OpenLibraryClient(BaseApiClient):
+class OpenLibraryClient(BaseApiClient, IOpenLibraryClient):
     BASE_URL = "https://openlibrary.org"
 
     async def request(self, endpoint: str, params: Optional[dict] = None) -> Optional[dict]:

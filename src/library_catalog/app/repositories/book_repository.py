@@ -1,13 +1,15 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from fastapi import Depends
 
 from src.library_catalog.app.models import book as book_models
 from src.library_catalog.app.schemas import book as book_schemas
 from src.library_catalog.app.integrations.open_library import OpenLibraryClient
+from src.library_catalog.app.database import get_session
 
 
 class BookRepository:
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
         self.openlibrary_client = OpenLibraryClient()
 
