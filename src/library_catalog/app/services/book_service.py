@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends
 
 from src.library_catalog.app.interfaces.book_service_interface import IBookService
 from src.library_catalog.app.schemas.book import BookCreate
@@ -8,8 +8,8 @@ from src.library_catalog.app.repositories.book_repository import BookRepository
 
 
 class BookService(IBookService):
-    def __init__(self, session: AsyncSession):
-        self.repo = BookRepository(session)
+    def __init__(self, repo: BookRepository = Depends()):
+        self.repo = repo
 
     async def get_all_books(self) -> List[Book]:
         return await self.repo.get_all()

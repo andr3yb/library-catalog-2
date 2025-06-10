@@ -18,5 +18,5 @@ class OpenLibraryClient(BaseApiClient, IOpenLibraryClient):
         return {
             "description": doc.get("first_sentence", {}).get("value") if isinstance(doc.get("first_sentence"), dict) else doc.get("first_sentence"),
             "cover_url": f"http://covers.openlibrary.org/b/id/{doc['cover_i']}-L.jpg" if doc.get("cover_i") else None,
-            "rating": doc.get("ratings_average")
+            "rating": doc.get("ratings_average"),
         }
