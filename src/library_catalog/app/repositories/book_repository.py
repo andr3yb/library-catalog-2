@@ -14,8 +14,9 @@ class BookRepository(IBookRepository):
         self.session = session
         self.openlibrary_client = OpenLibraryClient()
 
-    async def get_all(self):
-        result = await self.session.execute(select(book_models.Book))
+    async def get_all(self, limit: int, offset: int):
+        query = select(book_models.Book).offset(offset).limit(limit)
+        result = await self.session.execute(query)
         return result.scalars().all()
 
     async def get_by_id(self, book_id: int):

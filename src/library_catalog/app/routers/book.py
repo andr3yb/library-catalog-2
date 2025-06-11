@@ -7,8 +7,8 @@ from src.library_catalog.app.services.book_service import BookService
 router = APIRouter()
 
 @router.get("/", response_model=List[BookRead])
-async def list_books(service: BookService = Depends()):
-    return await service.get_all_books()
+async def list_books(limit: int = 10, offset: int = 0, service: BookService = Depends()):
+    return await service.get_all_books(limit, offset)
 
 @router.get("/{book_id}", response_model=BookRead)
 async def get_book(book_id: int, service: BookService = Depends()):

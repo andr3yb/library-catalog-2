@@ -11,8 +11,8 @@ class BookService(IBookService):
     def __init__(self, repo: BookRepository = Depends()):
         self.repo = repo
 
-    async def get_all_books(self) -> List[Book]:
-        return await self.repo.get_all()
+    async def get_all_books(self, limit: int, offset: int) -> List[Book]:
+        return await self.repo.get_all(limit, offset)
 
     async def get_book(self, book_id: int) -> Optional[Book]:
         return await self.repo.get_by_id(book_id)
