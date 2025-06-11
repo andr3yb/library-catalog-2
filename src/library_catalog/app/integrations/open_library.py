@@ -1,10 +1,11 @@
 from typing import Optional
+import os
 
 from .base import BaseApiClient
 from src.library_catalog.app.interfaces.open_library_interface import IOpenLibraryClient
 
 class OpenLibraryClient(BaseApiClient, IOpenLibraryClient):
-    BASE_URL = "https://openlibrary.org"
+    BASE_URL = os.getenv("OPEN_LIBRARY_BASE_URL")
 
     async def request(self, endpoint: str, params: Optional[dict] = None) -> Optional[dict]:
         return await self._get(endpoint, params)
