@@ -4,11 +4,12 @@ from fastapi import Depends
 
 from src.library_catalog.app.models import book as book_models
 from src.library_catalog.app.schemas import book as book_schemas
+from src.library_catalog.app.interfaces.book_repository_interface import IBookRepository
 from src.library_catalog.app.integrations.open_library import OpenLibraryClient
 from src.library_catalog.app.database import get_session
 
 
-class BookRepository:
+class BookRepository(IBookRepository):
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
         self.openlibrary_client = OpenLibraryClient()
