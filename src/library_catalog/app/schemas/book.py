@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class BookBase(BaseModel):
     title: str
     author: str
@@ -9,8 +10,10 @@ class BookBase(BaseModel):
     pages: int
     available: bool = True
 
+
 class BookCreate(BookBase):
     pass
+
 
 class BookRead(BookBase):
     id: int
@@ -20,4 +23,3 @@ class BookRead(BookBase):
 
     class Config:
         from_attributes = True
-

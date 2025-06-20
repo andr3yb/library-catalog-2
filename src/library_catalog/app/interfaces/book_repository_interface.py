@@ -5,7 +5,6 @@ from src.library_catalog.app.models.book import Book
 
 
 class IBookRepository(ABC):
-
     @abstractmethod
     async def get_all(self) -> List[Book]:
         pass
