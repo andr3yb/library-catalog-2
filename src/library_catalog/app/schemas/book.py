@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 
@@ -16,10 +16,9 @@ class BookCreate(BookBase):
 
 
 class BookRead(BookBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     description: Optional[str] = None
     cover_url: Optional[str] = None
     rating: Optional[float] = None
-
-    class Config:
-        from_attributes = True
