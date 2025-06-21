@@ -5,9 +5,6 @@ from src.library_catalog.app.schemas.book import BookCreate
 from src.library_catalog.app.models.book import Book
 
 
-pytest_plugins = ("pytest_asyncio",)
-
-
 @pytest.fixture
 def fake_repo():
     repo = AsyncMock()
