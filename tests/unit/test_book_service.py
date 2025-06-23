@@ -1,49 +1,136 @@
 import pytest
-from unittest.mock import AsyncMock
-from src.library_catalog.app.services.book_service import BookService
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+
+from src.library_catalog.app.database import Base
+from src.library_catalog.app.repositories.book_repository import BookRepository
 from src.library_catalog.app.schemas.book import BookCreate
-from src.library_catalog.app.models.book import Book
 
 
-@pytest.fixture
-def fake_repo():
-    repo = AsyncMock()
-    return repo
+@pytest_asyncio.fixture
+async def test_engine():
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    yield engine
+    await engine.dispose()
 
 
-@pytest.fixture
-def service(fake_repo):
-    return BookService(repo=fake_repo)
+@pytest_asyncio.fixture
+async def test_session(test_engine):
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    async_session = sessionmaker(
+        bind=test_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+    async with async_session() as session:
+        yield session
+
+
+@pytest_asyncio.fixture
+async def book_repository(test_session):
+    return BookRepository(session=test_session)
 
 
 @pytest.mark.asyncio
-async def test_get_all_books(service, fake_repo):
-    fake_repo.get_all.return_value = [Book(id=1, title="Test Book")]
-    books = await service.get_all_books(limit=10, offset=0)
-    assert len(books) == 1
-    assert books[0].title == "Test Book"
-    fake_repo.get_all.assert_called_once_with(10, 0)
-
-
-@pytest.mark.asyncio
-async def test_create_book(service, fake_repo):
+async def test_create_and_get_book(book_repository):
     book_data = BookCreate(
-        title="New Book",
+        title="SQLite Real",
         author="Author",
-        year=2020,
-        genre="Fiction",
-        pages=100,
+        year=2025,
+        genre="Test",
+        pages=123,
         available=True,
     )
-    fake_repo.create.return_value = Book(id=1, **book_data.model_dump())
-    book = await service.create_book(book_data)
-    assert book.title == "New Book"
-    fake_repo.create.assert_called_once()
+    created = await book_repository.create(book_data)
+    assert created.id is not None
+    assert created.title == "SQLite Real"
+
+    found = await book_repository.get_by_id(created.id)
+    assert found is not None
+    assert found.title == "SQLite Real"
 
 
 @pytest.mark.asyncio
-async def test_delete_book(service, fake_repo):
-    fake_repo.delete.return_value = True
-    result = await service.delete_book(1)
-    assert result is True
-    fake_repo.delete.assert_called_once_with(1)
+async def test_get_all_books(book_repository):
+    books = await book_repository.get_all(limit=10, offset=0)
+    assert books == []
+
+    await book_repository.create(
+        BookCreate(
+            title="Book One",
+            author="A",
+            year=2000,
+            genre="Fiction",
+            pages=100,
+            available=True,
+        )
+    )
+    await book_repository.create(
+        BookCreate(
+            title="Book Two",
+            author="B",
+            year=2010,
+            genre="Non-fiction",
+            pages=200,
+            available=False,
+        )
+    )
+
+    books = await book_repository.get_all(limit=10, offset=0)
+    assert len(books) == 2
+    titles = [b.title for b in books]
+    assert "Book One" in titles
+    assert "Book Two" in titles
+
+
+@pytest.mark.asyncio
+async def test_update_book(book_repository):
+    created = await book_repository.create(
+        BookCreate(
+            title="Original",
+            author="Author",
+            year=2020,
+            genre="Fiction",
+            pages=150,
+            available=True,
+        )
+    )
+
+    updated = await book_repository.update(
+        created.id,
+        BookCreate(
+            title="Updated",
+            author="Author New",
+            year=2021,
+            genre="Drama",
+            pages=200,
+            available=False,
+        ),
+    )
+
+    assert updated.title == "Updated"
+    assert updated.year == 2021
+
+
+@pytest.mark.asyncio
+async def test_delete_book(book_repository):
+    created = await book_repository.create(
+        BookCreate(
+            title="To Delete",
+            author="Someone",
+            year=1999,
+            genre="Old",
+            pages=50,
+            available=True,
+        )
+    )
+
+    deleted = await book_repository.delete(created.id)
+    assert deleted is not None
+    assert deleted.id == created.id
+
+    should_be_none = await book_repository.get_by_id(created.id)
+    assert should_be_none is None
