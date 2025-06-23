@@ -50,7 +50,7 @@ class BookRepository(IBookRepository):
         if not book:
             return None
 
-        for field, value in updated_data.dict().items():
+        for field, value in updated_data.model_dump().items():
             setattr(book, field, value)
 
         await self.session.commit()
