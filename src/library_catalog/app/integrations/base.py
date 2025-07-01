@@ -12,7 +12,9 @@ class BaseApiClient(abc.ABC):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @abc.abstractmethod
-    async def request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
+    async def request(
+        self, endpoint: str, params: Optional[Dict[str, Any]] = None
+    ) -> Any:
         """Абстрактный метод запроса"""
         pass
 

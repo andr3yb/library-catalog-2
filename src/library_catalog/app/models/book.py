@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float
 from src.library_catalog.app.database import Base
 
+
 class Book(Base):
     __tablename__ = "books"
 

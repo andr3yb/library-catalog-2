@@ -37,7 +37,7 @@ class BookRepository(IBookRepository):
             available=book_data.available,
             description=extra.get("description"),
             cover_url=extra.get("cover_url"),
-            rating=extra.get("rating")
+            rating=extra.get("rating"),
         )
 
         self.session.add(new_book)
@@ -50,7 +50,7 @@ class BookRepository(IBookRepository):
         if not book:
             return None
 
-        for field, value in updated_data.dict().items():
+        for field, value in updated_data.model_dump().items():
             setattr(book, field, value)
 
         await self.session.commit()

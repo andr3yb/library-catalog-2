@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
+
 
 class BookBase(BaseModel):
     title: str
@@ -9,15 +10,15 @@ class BookBase(BaseModel):
     pages: int
     available: bool = True
 
+
 class BookCreate(BookBase):
     pass
 
+
 class BookRead(BookBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     description: Optional[str] = None
     cover_url: Optional[str] = None
     rating: Optional[float] = None
-
-    class Config:
-        from_attributes = True
-
